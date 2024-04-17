@@ -52,36 +52,54 @@ int main(int argc, char ** argv) {
     MPI_Init(&argc, &argv);
 
     int rank, num_procs;
+    MPI_Status status;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+    string filename = argv[1];
+    int num_steps = atoi(argv[2]);
+    const int grid_size = num_procs;
+    
+    vector < vector < int > > grid(num_procs, vector < int > (num_procs, 0));
+
     if (argc != 3) {
         if (rank == 0) {
-            cerr << "Usage: " << argv[0] << " <input_file> <number_of_steps>" <<
-                endl;
+            cerr << "Usage: " << argv[0] << " <input_file> <number_of_steps>" << endl;
         }
         MPI_Finalize();
         return 1;
-    } else {
-        if (rank == 0) {
-            cout << "Number of processes: " << num_procs << endl;
-            cout << "Input file: " << argv[1] << endl;
-            cout << "Number of steps: " << argv[2] << endl;
-        }
     }
-    string filename = argv[1];
-    int num_steps = atoi(argv[2]);
-
-    vector < vector < int > > grid(num_procs, vector < int > (num_procs, 0));
-    initializeGridFromFile(grid, filename);
 
     if (rank == 0) {
+        initializeGridFromFile(grid, filename);
         printGrid(grid);
+    }
+
+    int row[grid_size];
+    int neighbors[8]; 
+
+    MPI_Scatter(&grid[0][0], grid_size, MPI_INT, row, grid_size, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int left_rank = (rank - 1 + num_procs) % num_procs;
+    int right_rank = (rank + 1) % num_procs;
+
+    MPI_Sendrecv(&row, grid_size, MPI_INT, left_rank, 0,
+                 &neighbors[0], grid_size, MPI_INT, right_rank, 0,
+                 MPI_COMM_WORLD, &status);
+
+    MPI_Sendrecv(&row, grid_size, MPI_INT, right_rank, 0,
+                 &neighbors[4], grid_size, MPI_INT, left_rank, 0,
+                 MPI_COMM_WORLD, &status);
+
+
+    // Print the neighbors
+    cout << "Rank " << rank << " has neighbors: ";
+    for (int i = 0; i < 8; ++i) {
+        cout << neighbors[i] << " ";
     }
 
     /* for (int step = 0; step < num_steps; ++step) {
         updateGrid(grid);
-
         MPI_Barrier(MPI_COMM_WORLD);
     } */
 
