@@ -61,6 +61,7 @@ int main(int argc, char ** argv) {
     const int grid_size = num_procs;
     
     vector < vector < int > > grid(num_procs, vector < int > (num_procs, 0));
+    vector<int> flat_grid(grid_size * grid_size);
 
     if (argc != 3) {
         if (rank == 0) {
@@ -73,30 +74,27 @@ int main(int argc, char ** argv) {
     if (rank == 0) {
         initializeGridFromFile(grid, filename);
         printGrid(grid);
+        for (int i = 0; i < grid_size; ++i) {
+        for (int j = 0; j < grid_size; ++j) {
+            flat_grid[i * grid_size + j] = grid[i][j];
+        }
+    }
     }
 
-    int row[grid_size];
+    vector < int > row(grid_size);
+
+    MPI_Scatter(flat_grid.data(), grid_size, MPI_INT, row.data(), grid_size, MPI_INT, 0, MPI_COMM_WORLD);
+    // Print the row
+    cout << "Rank " << rank << " has row vector: ";
+    for (int i = 0; i < row.size(); ++i) {
+        cout << row[i] << " ";
+    }
+    cout << endl;
+
+    
     int neighbors[8]; 
-
-    MPI_Scatter(&grid[0][0], grid_size, MPI_INT, row, grid_size, MPI_INT, 0, MPI_COMM_WORLD);
-
     int left_rank = (rank - 1 + num_procs) % num_procs;
     int right_rank = (rank + 1) % num_procs;
-
-    MPI_Sendrecv(&row, grid_size, MPI_INT, left_rank, 0,
-                 &neighbors[0], grid_size, MPI_INT, right_rank, 0,
-                 MPI_COMM_WORLD, &status);
-
-    MPI_Sendrecv(&row, grid_size, MPI_INT, right_rank, 0,
-                 &neighbors[4], grid_size, MPI_INT, left_rank, 0,
-                 MPI_COMM_WORLD, &status);
-
-
-    // Print the neighbors
-    cout << "Rank " << rank << " has neighbors: ";
-    for (int i = 0; i < 8; ++i) {
-        cout << neighbors[i] << " ";
-    }
 
     /* for (int step = 0; step < num_steps; ++step) {
         updateGrid(grid);

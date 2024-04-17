@@ -13,7 +13,7 @@ num_processors=$(sed -n '$=' "$life_grid_file")
 mpic++ --prefix /usr/local/share/OpenMPI -o life life.cpp
 
 # Spuštění programu
-mpirun --prefix /usr/local/share/OpenMPI -np $num_processors life $life_grid_file $num_iterations 				
+mpirun --prefix /usr/local/share/OpenMPI --oversubscribe -np $num_processors life $life_grid_file $num_iterations 		
 
 # Úklid
 # rm -f life numbers
