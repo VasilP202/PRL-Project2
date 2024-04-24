@@ -4,13 +4,15 @@
  * Author: Vasil Poposki (xpopos00)
  * Year: 2024
  * 
- * Description: Parallel implementation of the Game of Life using MPI library.
- *              Program cam be run using test.sh script.
- *              The program takes an input file with the initial state of the grid and
- *              the number of steps to simulate.
- *              
- * Implementation details: Wrap-around implementation is used for the neighbors of the cells.
- *                         Each processor is responsible for a single row of the grid.
+ * Description: 
+ *      Parallel implementation of the Game of Life using MPI library.
+ *      Program cam be run using test.sh script.
+ *      The program takes an input file with the initial state of the grid and
+ *      the number of steps to simulate.
+ *
+ * Implementation details: 
+ *      Wrap-around implementation is used for the neighbors of the cells.
+ *      Each processor is responsible for a single row of a grid.
  */
 
 #include <cstdlib>
@@ -194,6 +196,7 @@ int main(int argc, char ** argv) {
     // Root processor prints the final state of the grid
     if (rank == 0) {
         for (int i = 0; i < num_procs; ++i) {
+            cout << i << ": ";
             for (int j = 0; j < grid_size; ++j) {
                 cout << all_rows[i * grid_size + j];
             }
