@@ -1,12 +1,12 @@
 /**
  * Paralelní a distribuované algoritmy (PRL)
- * Project 1: "Game of Life"
+ * Project 2: "Game of Life"
  * Author: Vasil Poposki (xpopos00)
  * Year: 2024
  * 
  * Description: 
  *      Parallel implementation of the Game of Life using MPI library.
- *      Program cam be run using test.sh script.
+ *      Program should be run using test.sh script.
  *      The program takes an input file with the initial state of the grid and
  *      the number of steps to simulate.
  *
@@ -35,7 +35,7 @@ const int CELL_ALIVE = 1;      // Cell state 1
  * @param filename - name of the file with the initial state of the grid
  * @param grid_size - size of the grid
  */
-void initializeGridFromFile(vector<vector<int>> & grid, const string & filename, int grid_size) {
+void initializeGridFromFile(vector<vector<int> > & grid, const string & filename, int grid_size) {
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Error: Unable to open file " << filename << endl;
@@ -107,7 +107,7 @@ int main(int argc, char ** argv) {
     int num_steps = atoi(argv[2]);
 
     // 2D vector to store the grid
-    vector<vector<int>> grid(num_procs, vector<int> (num_procs, 0)); 
+    vector<vector<int> > grid(num_procs, vector<int> (num_procs, 0)); 
     // Flatten vector used for data distribution
     vector<int> flat_grid(grid_size * grid_size);
 
